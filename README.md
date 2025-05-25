@@ -556,3 +556,284 @@ The API documentation is available via Swagger:
 ## 📄 License
 
 MIT License - see LICENSE file for details
+
+
+# Estructura de Carpetas - Calendar Management API Backend
+
+## 🏗️ Estructura Principal
+
+```
+calendar-backend/
+├── src/
+│   ├── main.ts                          # Punto de entrada de la aplicación
+│   ├── app.module.ts                    # Módulo principal
+│   ├── app.controller.ts                # Controlador de la app
+│   ├── app.service.ts                   # Servicio de la app
+│   │
+│   ├── config/                          # Configuraciones
+│   │   ├── database.config.ts           # Configuración de BD
+│   │   ├── jwt.config.ts                # Configuración JWT
+│   │   ├── google.config.ts             # Configuración Google OAuth
+│   │   └── app.config.ts                # Configuración general
+│   │
+│   ├── common/                          # Elementos compartidos
+│   │   ├── decorators/                  # Decoradores personalizados
+│   │   │   ├── tenant.decorator.ts
+│   │   │   └── user.decorator.ts
+│   │   ├── guards/                      # Guards de seguridad
+│   │   │   ├── jwt-auth.guard.ts
+│   │   │   ├── tenant.guard.ts
+│   │   │   └── google-auth.guard.ts
+│   │   ├── filters/                     # Filtros de excepción
+│   │   │   └── http-exception.filter.ts
+│   │   ├── interceptors/                # Interceptores
+│   │   │   ├── logging.interceptor.ts
+│   │   │   └── tenant.interceptor.ts
+│   │   ├── pipes/                       # Pipes de validación
+│   │   │   └── validation.pipe.ts
+│   │   └── constants/                   # Constantes
+│   │       └── auth.constants.ts
+│   │
+│   ├── database/                        # Base de datos
+│   │   ├── entities/                    # Entidades TypeORM
+│   │   │   ├── tenant.entity.ts
+│   │   │   ├── user.entity.ts
+│   │   │   └── index.ts
+│   │   ├── migrations/                  # Migraciones
+│   │   │   └── [timestamp]-initial-setup.ts
+│   │   ├── seeds/                       # Datos de prueba
+│   │   │   └── tenant.seed.ts
+│   │   └── database.module.ts           # Módulo de BD
+│   │
+│   ├── auth/                           # Módulo de autenticación
+│   │   ├── auth.module.ts
+│   │   ├── auth.controller.ts
+│   │   ├── auth.service.ts
+│   │   ├── strategies/                  # Estrategias Passport
+│   │   │   ├── jwt.strategy.ts
+│   │   │   └── google.strategy.ts
+│   │   ├── dto/                        # DTOs de auth
+│   │   │   ├── login.dto.ts
+│   │   │   └── auth-response.dto.ts
+│   │   └── interfaces/                 # Interfaces
+│   │       └── jwt-payload.interface.ts
+│   │
+│   ├── calendar/                       # Módulo de calendario
+│   │   ├── calendar.module.ts
+│   │   ├── calendar.controller.ts
+│   │   ├── calendar.service.ts
+│   │   ├── dto/                        # DTOs de calendario
+│   │   │   ├── create-event.dto.ts
+│   │   │   ├── update-event.dto.ts
+│   │   │   └── event-response.dto.ts
+│   │   ├── interfaces/                 # Interfaces
+│   │   │   └── google-calendar.interface.ts
+│   │   └── services/                   # Servicios específicos
+│   │       └── google-calendar.service.ts
+│   │
+│   ├── tenant/                         # Módulo de tenant (multi-tenancy)
+│   │   ├── tenant.module.ts
+│   │   ├── tenant.controller.ts
+│   │   ├── tenant.service.ts
+│   │   ├── dto/                        # DTOs de tenant
+│   │   │   ├── create-tenant.dto.ts
+│   │   │   └── update-tenant.dto.ts
+│   │   └── interfaces/
+│   │       └── tenant.interface.ts
+│   │
+│   ├── user/                           # Módulo de usuarios
+│   │   ├── user.module.ts
+│   │   ├── user.controller.ts
+│   │   ├── user.service.ts
+│   │   ├── dto/                        # DTOs de usuario
+│   │   │   ├── create-user.dto.ts
+│   │   │   └── update-user.dto.ts
+│   │   └── interfaces/
+│   │       └── user.interface.ts
+│   │
+│   └── health/                         # Health checks
+│       ├── health.module.ts
+│       ├── health.controller.ts
+│       └── health.service.ts
+│
+├── test/                               # Tests e2e
+│   ├── app.e2e-spec.ts
+│   ├── auth.e2e-spec.ts
+│   ├── calendar.e2e-spec.ts
+│   └── jest-e2e.json
+│
+├── docs/                               # Documentación
+│   ├── api/                           # Documentación API
+│   ├── deployment/                    # Guías de despliegue
+│   └── architecture.md               # Documentación arquitectura
+│
+├── scripts/                           # Scripts de utilidad
+│   ├── setup-db.sh                   # Script setup BD
+│   └── deploy.sh                     # Script de despliegue
+│
+├── .env.example                       # Ejemplo variables entorno
+├── .env                              # Variables entorno (no versionar)
+├── .gitignore                        # Archivos ignorados por Git
+├── .eslintrc.js                      # Configuración ESLint
+├── .prettierrc                       # Configuración Prettier
+├── nest-cli.json                     # Configuración Nest CLI
+├── package.json                      # Dependencias y scripts
+├── tsconfig.json                     # Configuración TypeScript
+├── tsconfig.build.json               # Config TS para build
+├── jest.config.js                    # Configuración Jest
+├── docker-compose.yml                # Docker Compose para desarrollo
+├── Dockerfile                        # Dockerfile para producción
+└── README.md                         # Documentación principal
+```
+
+## 📁 Descripción Detallada por Carpeta
+
+### `/src/config/`
+Contiene todas las configuraciones de la aplicación, separadas por responsabilidad:
+- Configuración de base de datos
+- Configuración JWT
+- Configuración de Google OAuth
+- Variables de entorno
+
+### `/src/common/`
+Elementos compartidos a través de toda la aplicación:
+- **Guards**: Protección de rutas y validación de permisos
+- **Decorators**: Decoradores personalizados como `@CurrentUser`, `@CurrentTenant`
+- **Filters**: Manejo centralizado de excepciones
+- **Interceptors**: Lógica transversal como logging y multi-tenancy
+- **Pipes**: Validación y transformación de datos
+
+### `/src/database/`
+Todo lo relacionado con la base de datos:
+- **Entities**: Modelos de datos con TypeORM
+- **Migrations**: Control de versiones de BD
+- **Seeds**: Datos iniciales para desarrollo/testing
+
+### Módulos Principales
+
+#### `/src/auth/`
+Manejo completo de autenticación:
+- JWT Strategy
+- Google OAuth Strategy
+- Login/logout/refresh tokens
+- Validación de usuarios
+
+#### `/src/calendar/`
+Integración con Google Calendar API:
+- CRUD de eventos
+- Sincronización con Google Calendar
+- Manejo de calendarios múltiples
+
+#### `/src/tenant/`
+Lógica de multi-tenancy:
+- Gestión de tenants
+- Aislamiento de datos por tenant
+- Configuración por tenant
+
+#### `/src/user/`
+Gestión de usuarios:
+- CRUD de usuarios
+- Relación con tenants
+- Perfiles de usuario
+
+### Archivos de Configuración
+
+#### `package.json`
+```json
+{
+  "name": "calendar-backend",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "nest start",
+    "start:dev": "nest start --watch",
+    "start:debug": "nest start --debug --watch",
+    "start:prod": "node dist/main",
+    "build": "nest build",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage",
+    "migration:generate": "typeorm-ts-node-esm migration:generate",
+    "migration:run": "typeorm-ts-node-esm migration:run",
+    "migration:revert": "typeorm-ts-node-esm migration:revert"
+  }
+}
+```
+
+#### `docker-compose.yml` (para desarrollo)
+```yaml
+version: '3.8'
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: calendar_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  app:
+    build: .
+    ports:
+      - "3001:3001"
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_HOST: postgres
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+volumes:
+  postgres_data:
+```
+
+## 🚀 Comandos de Inicio Rápido
+
+```bash
+# 1. Clonar y setup inicial
+git clone <repo-url>
+cd calendar-backend
+npm install
+
+# 2. Configurar entorno
+cp .env.example .env
+# Editar .env con tus configuraciones
+
+# 3. Setup base de datos
+docker-compose up -d postgres
+npm run migration:run
+
+# 4. Ejecutar en desarrollo
+npm run start:dev
+```
+
+## 📋 Checklist de Implementación
+
+### Fase 1: Setup Básico
+- [ ] Crear estructura de carpetas
+- [ ] Configurar TypeORM y PostgreSQL
+- [ ] Implementar entidades básicas (User, Tenant)
+- [ ] Setup JWT y guards básicos
+
+### Fase 2: Autenticación
+- [ ] Google OAuth Strategy
+- [ ] JWT Strategy
+- [ ] Auth controller y service
+- [ ] Multi-tenancy guards
+
+### Fase 3: Calendar Integration
+- [ ] Google Calendar API integration
+- [ ] Calendar service y controller
+- [ ] Event CRUD operations
+- [ ] Calendar sync functionality
+
+### Fase 4: Testing y Deploy
+- [ ] Unit tests
+- [ ] Integration tests
+- [ ] Docker setup
+- [ ] CI/CD pipeline
+
+Esta estructura te proporciona una base sólida y escalable para el proyecto, siguiendo las mejores prácticas de NestJS y arquitectura hexagonal.
